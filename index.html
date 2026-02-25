@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SideMC.pl</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#0f0f0f',
+                            dark: '#141414',
+                            white: '#ffffff',
+                            gray: '#f5f5f5',
+                            textGray: '#888888'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            overflow-x: hidden;
+        }
+        .bg-dots-pattern {
+            background-image: radial-gradient(#e5e7eb 2px, transparent 2px);
+            background-size: 24px 24px;
+        }
+        .bg-dots-dark {
+            background-image: radial-gradient(rgba(255,255,255,0.05) 2px, transparent 2px);
+            background-size: 24px 24px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.4); }
+
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover { color: #000; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #000;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="font-sans text-brand-black antialiased relative min-h-screen flex flex-col">
+    <div id="mobile-menu" class="fixed inset-0 bg-white z-[100] transform translate-x-full transition-transform duration-300 flex flex-col pt-8 px-6 pb-8 lg:hidden">
+        <div class="flex justify-between items-center mb-16">
+            <a href="#home" id="mobile-logo" onclick="toggleMobileMenu()" class="flex items-center">
+                <svg class="h-8 w-auto text-brand-black" viewBox="0 0 100 100" fill="currentColor">
+                    <path d="M 20 80 L 45 15 L 65 15 L 40 80 Z" />
+                    <path d="M 50 15 L 85 50 L 55 80 L 45 70 L 65 50 L 40 25 Z" />
+                </svg>
+            </a>
+            <button onclick="toggleMobileMenu()" class="text-3xl text-brand-black hover:text-gray-500 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <nav class="flex flex-col space-y-8 text-left mt-4">
+            <a href="#home" onclick="toggleMobileMenu()" class="text-2xl font-black uppercase tracking-widest text-brand-black">Strona Główna</a>
+            <a href="#tryby" onclick="toggleMobileMenu()" class="text-2xl font-black uppercase tracking-widest text-gray-400 hover:text-black">Tryby</a>
+            <a href="#sklep" onclick="toggleMobileMenu()" id="mobile-nav-shop" class="text-2xl font-black uppercase tracking-widest text-gray-400 hover:text-black">Sklep</a>
+            <button onclick="openRules(); toggleMobileMenu()" class="text-2xl font-black uppercase tracking-widest text-gray-400 hover:text-black text-left">Regulamin</button>
+            <a href="#discord-section" onclick="toggleMobileMenu()" id="mobile-nav-discord" class="text-2xl font-black uppercase tracking-widest text-gray-400 hover:text-black">Discord</a>
+        </nav>
+
+        <div class="mt-auto mb-4 flex justify-start space-x-8">
+            <a href="#" id="mobile-nav-ig" target="_blank" class="text-3xl text-gray-300 hover:text-brand-black transition-colors"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" id="mobile-nav-dc" target="_blank" class="text-3xl text-gray-300 hover:text-brand-black transition-colors"><i class="fa-brands fa-discord"></i></a>
+            <a href="#" id="mobile-nav-tt" target="_blank" class="text-3xl text-gray-300 hover:text-brand-black transition-colors"><i class="fa-brands fa-tiktok"></i></a>
+            <a href="#" id="mobile-nav-yt" target="_blank" class="text-3xl text-gray-300 hover:text-brand-black transition-colors"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+    </div>
+    <div class="relative w-full bg-white flex flex-col min-h-[90vh]">
+        <div class="absolute top-10 left-10 w-64 h-64 bg-dots-pattern opacity-60 z-0 hidden lg:block"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-dots-pattern opacity-60 z-0 hidden lg:block"></div>
+
+        <header class="relative z-20 w-full pt-6 md:pt-8 px-6 md:px-12 lg:px-24 flex justify-between items-center">
+            <a href="#home" id="site-logo" class="flex items-center group transition-transform hover:scale-105">
+                <svg class="h-10 md:h-12 lg:h-14 w-auto text-brand-black" viewBox="0 0 100 100" fill="currentColor">
+                    <path d="M 20 80 L 45 15 L 65 15 L 40 80 Z" />
+                    <path d="M 50 15 L 85 50 L 55 80 L 45 70 L 65 50 L 40 25 Z" />
+                </svg>
+            </a>
+            <nav class="hidden lg:flex items-center space-x-10">
+                <a href="#home" class="nav-link text-xs font-bold tracking-widest text-gray-800 uppercase">Strona Główna</a>
+                <a href="#tryby" class="nav-link text-xs font-bold tracking-widest text-gray-500 uppercase hover:text-black">Tryby</a>
+                <a href="#sklep" id="nav-shop" class="nav-link text-xs font-bold tracking-widest text-gray-500 uppercase hover:text-black">Sklep</a>
+                <button onclick="openRules()" class="nav-link text-xs font-bold tracking-widest text-gray-500 uppercase hover:text-black">Regulamin</button>
+                <a href="#discord-section" id="nav-discord" class="nav-link text-xs font-bold tracking-widest text-gray-500 uppercase hover:text-black">Discord</a>
+            </nav>
+            <div class="lg:hidden flex items-center">
+                <button onclick="toggleMobileMenu()" class="text-3xl text-brand-black"><i class="fa-solid fa-bars-staggered"></i></button>
+            </div>
+        </header>
+        <main id="home" class="flex-grow relative z-10 w-full flex items-center px-6 md:px-12 lg:px-24 py-12 lg:py-0">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 w-full max-w-7xl mx-auto items-center mt-6 lg:mt-0">
+                <div class="relative w-full z-10">
+                    <svg class="absolute top-1/2 left-[-5%] transform -translate-y-1/2 z-0 w-[200%] sm:w-[160%] md:w-[150%] pointer-events-none select-none overflow-visible" viewBox="0 0 1000 400" preserveAspectRatio="xMinYMid meet">
+                        <text id="bg-text" x="0" y="50%" dominant-baseline="central" font-family="'Montserrat', sans-serif" font-weight="900" font-size="380" fill="#ffffff" stroke="#e5e5e5" stroke-width="4" stroke-linejoin="round" paint-order="stroke fill" letter-spacing="8">SIDE</text>
+                    </svg>
+                    <div class="flex items-center space-x-3 mb-4 md:mb-6 relative z-10 pl-1 md:pl-2">
+                        <div id="status-dot" class="w-2.5 h-2.5 bg-brand-black rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] animate-pulse transition-colors"></div>
+                        <span class="text-xs md:text-sm font-semibold text-gray-700">Graczy online: <span id="online-count" class="text-brand-black">Ładowanie...</span></span>
+                    </div>
+                    <h1 class="font-heading font-black text-[3.5rem] leading-[0.9] sm:text-6xl md:text-7xl lg:text-[7rem] tracking-tight mb-6 md:mb-8 relative z-10 uppercase flex flex-wrap">
+                        <span id="title-part1">SIDE</span><span id="title-part2" class="text-brand-black">MC</span>
+                    </h1>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-6 relative z-10 mt-8 md:mt-10">
+                        <div class="relative flex flex-col items-center group cursor-pointer w-full sm:w-auto" onclick="copyIP()">
+                            <button class="bg-brand-black text-white px-8 md:px-10 py-4 text-xs md:text-sm font-bold tracking-widest uppercase w-full sm:w-auto transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.2)] focus:outline-none shadow-xl">
+                                <span id="ip-button-text">SIDEMC.PL</span>
+                            </button>
+                            <div class="absolute -bottom-8 flex flex-col items-center opacity-0 md:opacity-80 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex">
+                                <i class="fa-solid fa-chevron-up text-gray-400 text-[10px] mb-1 group-hover:-translate-y-1 transition-transform"></i>
+                                <span id="copy-text" class="text-[10px] font-bold tracking-widest uppercase text-gray-500 whitespace-nowrap">Skopiuj adres IP</span>
+                            </div>
+                        </div>
+                        <a href="#discord-section" class="border-2 border-brand-black text-brand-black px-8 md:px-10 py-4 text-xs md:text-sm font-bold tracking-widest uppercase flex items-center justify-center w-full sm:w-auto hover:bg-brand-black hover:text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.2)] group shadow-sm">
+                            DOŁĄCZ <i class="fa-brands fa-discord ml-3 text-lg group-hover:scale-125 transition-transform duration-300"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="relative z-10 flex justify-center lg:justify-end items-end mt-12 lg:mt-0 w-full h-full">
+                    <div class="relative w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-xl xl:max-w-2xl drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] flex items-end">
+                        <img id="hero-image" src="" alt="Postacie Minecraft" class="w-full h-auto object-bottom object-contain z-10 relative" draggable="false">
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div class="absolute bottom-8 left-6 md:left-12 lg:left-24 z-20 hidden md:flex">
+            <a href="#tryby" class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-black hover:border-black transition-colors">
+                <i class="fa-solid fa-chevron-down text-sm"></i>
+            </a>
+        </div>
+    </div>
+    <section id="tryby" class="relative w-full bg-gray-50 py-20 md:py-32 px-6 md:px-12 lg:px-24 overflow-hidden border-t border-gray-200">
+        <div class="absolute inset-0 bg-dots-pattern opacity-60 z-0"></div>
+        
+        <div class="absolute left-6 md:left-12 lg:left-24 top-0 bottom-0 w-[1px] bg-black/5 z-10 hidden md:block"></div>
+        <div class="absolute left-6 md:left-12 lg:left-24 top-32 -translate-x-1/2 w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-brand-black text-xs font-bold z-20 hidden md:flex shadow-sm">
+            01
+        </div>
+        <div class="max-w-7xl mx-auto relative z-10 flex flex-col items-center">
+            <div class="text-center mb-12 md:mb-16">
+                <h2 class="font-heading font-black text-3xl md:text-5xl text-brand-black uppercase tracking-tight">Wybierz <span class="text-gray-400">Tryb</span></h2>
+                <p class="text-gray-500 mt-2 text-xs md:text-sm font-bold tracking-widest uppercase"></p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full" id="modes-grid">
+            </div>
+        </div>
+    </section>
+    <section id="discord-section" class="relative w-full bg-[#0a0a0a] py-20 md:py-32 px-6 md:px-12 lg:px-24 overflow-hidden border-t border-white/5">
+        <div class="absolute inset-0 bg-dots-dark opacity-20 z-0"></div>
+        <svg class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 w-[150%] md:w-[110%] h-auto pointer-events-none select-none overflow-visible" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid meet">
+            <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-family="'Montserrat', sans-serif" font-weight="900" font-size="220" fill="#0a0a0a" stroke="rgba(255, 255, 255, 0.04)" stroke-width="4" stroke-linejoin="round" paint-order="stroke fill" letter-spacing="15">DISCORD</text>
+        </svg>
+
+        <div class="absolute right-6 md:right-12 lg:right-24 top-0 bottom-0 w-[1px] bg-white/10 z-10 hidden md:block"></div>
+        <div class="absolute right-6 md:right-12 lg:right-24 top-32 translate-x-1/2 w-10 h-10 rounded-full border border-white/20 bg-brand-black flex items-center justify-center text-white text-xs font-bold z-20 hidden md:flex">
+            02
+        </div>
+        <div class="max-w-6xl mx-auto relative z-10 flex flex-col md:flex-row items-center justify-center md:justify-between gap-12">
+            <div class="w-full md:w-1/2 flex justify-center lg:justify-start">
+                <img id="discord-mascot" src="" alt="Discord Mascot" class="w-64 sm:w-80 md:w-96 lg:w-[30rem] xl:w-[35rem] h-auto object-contain animate-float drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+            </div>
+
+            <div class="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left space-y-6">
+                <h2 class="font-heading font-black text-3xl md:text-4xl lg:text-5xl text-white uppercase tracking-tight leading-tight">
+                    Odwiedź nasz serwer <span class="text-gray-400">Discord</span>
+                </h2>
+                <p class="text-gray-400 text-xs md:text-sm font-bold tracking-widest uppercase">
+                    Aby być ze wszystkim na bieżąco
+                </p>
+                <a href="#" id="discord-btn-2" target="_blank" class="bg-white text-brand-black px-10 md:px-12 py-4 text-xs md:text-sm font-bold tracking-widest uppercase flex items-center justify-center w-full sm:w-auto hover:bg-gray-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(255,255,255,0.2)] group">
+                    DOŁĄCZ <i class="fa-brands fa-discord ml-3 text-xl group-hover:scale-125 transition-transform duration-300"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+    <footer id="stopka" class="relative w-full py-16 md:py-20 px-6 md:px-12 lg:px-24 bg-white z-20 overflow-hidden border-t border-gray-100">
+        <div class="absolute inset-0 bg-dots-pattern opacity-60 z-0"></div>
+        <div class="max-w-7xl mx-auto relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 justify-items-start lg:justify-items-center text-center md:text-left">       
+            <div class="flex-shrink-0 lg:justify-self-start mx-auto md:mx-0" id="footer-logo"></div>
+            <div class="flex flex-col space-y-4 w-full md:w-auto">
+                <h4 class="font-bold text-sm text-brand-black mb-2">Nawigacja</h4>
+                <a href="#home" class="text-sm text-gray-500 hover:text-black transition-colors">Strona główna</a>
+                <a href="#sklep" class="text-sm text-gray-500 hover:text-black transition-colors">Sklep</a>
+                <button onclick="openRules()" class="text-sm text-gray-500 hover:text-black transition-colors md:text-left">Regulamin</button>
+            </div>
+            <div class="flex flex-col space-y-4 w-full md:w-auto">
+                <h4 class="font-bold text-sm text-brand-black mb-2">Socialmedia</h4>
+                <a href="#" id="nav-ig" target="_blank" class="text-sm text-gray-500 hover:text-black transition-colors">Instagram</a>
+                <a href="#" id="nav-dc-footer" target="_blank" class="text-sm text-gray-500 hover:text-black transition-colors">Discord</a>
+                <a href="#" id="nav-tt" target="_blank" class="text-sm text-gray-500 hover:text-black transition-colors">Tiktok</a>
+                <a href="#" id="nav-yt" target="_blank" class="text-sm text-gray-500 hover:text-black transition-colors">YouTube</a>
+            </div>
+            <div class="flex flex-col space-y-4 w-full lg:justify-self-end items-center md:items-start">
+                <h4 class="font-bold text-sm text-brand-black mb-2">Skopiuj nowy adres IP</h4>
+                <button onclick="copyIP()" class="bg-brand-black text-white px-10 py-4 text-xs md:text-sm font-bold tracking-widest uppercase transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.2)] w-full md:w-max shadow-md">
+                    <span id="footer-ip-btn-text">SIDEMC.PL</span>
+                </button>
+            </div>
+        </div>
+        <div class="max-w-4xl mx-auto relative z-10 text-center mt-16 md:mt-24 space-y-2">
+            <p id="footer-copyright" class="font-bold text-brand-black text-xs md:text-[13px] tracking-wide"></p>
+            <p id="footer-disclaimer-pl" class="text-[10px] md:text-[11px] text-gray-400 font-medium pt-2"></p>
+            <p id="footer-disclaimer-en" class="text-[10px] md:text-[11px] text-gray-400 font-medium"></p>
+            <div class="flex justify-center mt-10" id="footer-logo-small"></div>
+        </div>
+    </footer>
+    <div id="rules-modal" class="fixed inset-0 z-[110] hidden opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeRules()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] md:w-[90%] max-w-5xl bg-white rounded-2xl shadow-2xl max-h-[90vh] md:max-h-[85vh] flex flex-col overflow-hidden border border-gray-200">
+            <div class="relative px-6 md:px-8 py-8 md:py-10 border-b border-gray-100 flex justify-center items-center bg-gray-50 overflow-hidden shrink-0">
+                <svg class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 w-[120%] md:w-full h-auto pointer-events-none select-none overflow-visible" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid meet">
+                    <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-family="'Montserrat', sans-serif" font-weight="900" font-size="180" fill="#f9fafb" stroke="rgba(0,0,0,0.03)" stroke-width="4" stroke-linejoin="round" paint-order="stroke fill" letter-spacing="10">REGULAMIN</text>
+                </svg>
+                <h2 class="font-heading font-black text-2xl md:text-4xl uppercase tracking-tight relative z-10 text-center">
+                    Regulamin <span class="text-gray-400">& Polityka</span>
+                </h2>
+                <button onclick="closeRules()" class="absolute top-4 right-4 md:top-6 md:right-6 text-gray-400 hover:text-black transition-colors z-20 bg-white/50 rounded-full w-8 h-8 md:w-auto md:h-auto flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xl md:text-3xl"></i>
+                </button>
+            </div>
+            <div class="p-6 md:p-12 overflow-y-auto custom-scrollbar text-xs md:text-sm text-gray-600 space-y-8 md:space-y-10 relative z-10 bg-white">
+                <div class="text-center max-w-3xl mx-auto mb-8 md:mb-10">
+                    <h3 class="font-heading font-black text-xl md:text-2xl text-brand-black uppercase tracking-widest mb-4">Regulamin Serwisu i Serwera SideMC</h3>
+                </div>
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">I. Postanowienia Ogólne</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Niniejszy regulamin (zwany dalej „Regulaminem”) określa zasady korzystania z serwera gier Minecraft SideMC (zwanego dalej „Serwerem”), strony internetowej oraz sklepu internetowego powiązanego z Serwerem.</li>
+                        <li>Właścicielem i administratorem Serwera jest SideMC.</li>
+                        <li>Korzystanie z Serwera jest równoznaczne z pełną akceptacją niniejszego Regulaminu. Użytkownik, który nie zgadza się z jego postanowieniami, jest zobowiązany do zaprzestania korzystania z usług Serwera.</li>
+                        <li>Serwer SideMC nie jest w żaden sposób powiązany z firmą Mojang AB ani Microsoft. Wszystkie ewentualne roszczenia należy kierować do administratora Serwera.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">II. Definicje</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li><strong>Użytkownik</strong> – każda osoba fizyczna łącząca się z Serwerem.</li>
+                        <li><strong>Wirtualna Waluta/Przedmioty</strong> – cyfrowe dobra dostępne w grze, nieposiadające wartości rzeczywistej w obrocie prawnym.</li>
+                        <li><strong>Reedycja (Sezon)</strong> – cykliczne odświeżenie rozgrywki, wiążące się z całkowitym usunięciem postępów (mapy, przedmiotów, statystyk).</li>
+                        <li><strong>ItemShop</strong> – system sprzedaży usług i treści cyfrowych powiązanych z Serwerem.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">III. Zasady Świadczenia Usług i Reedycje</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Administrator zastrzega sobie prawo do czasowego lub stałego wyłączenia Serwera bez podania przyczyny.</li>
+                        <li>Polityka Reedycji: Użytkownik przyjmuje do wiadomości, że Serwer SideMC opiera się na systemie sezonowym. W momencie zakończenia edycji (tzw. „wipe”), wszystkie postępy, w tym zdobyte lub zakupione przedmioty wirtualne, zostają bezpowrotnie usunięte.</li>
+                        <li>Administrator nie ponosi odpowiedzialności za utratę przedmiotów wynikającą z błędów gry, ataków DDoS, awarii technicznych lub działań osób trzecich.</li>
+                        <li>W przypadku całkowitego zamknięcia projektu SideMC, Użytkownikom nie przysługuje zwrot kosztów za zakupione usługi cyfrowe.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">IV. Sklep i Płatności (ItemShop)</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Zakup jakichkolwiek usług w ItemShopie jest dobrowolny i stanowi wsparcie dla utrzymania infrastruktury Serwera.</li>
+                        <li>Wszystkie produkty oferowane w sklepie są treściami cyfrowymi, które nie są zapisane na nośniku materialnym.</li>
+                        <li>Zgodnie z obowiązującym prawem (art. 38 pkt 13 ustawy o prawach konsumenta), Użytkownik dokonując zakupu, wyraża zgodę na spełnienie świadczenia przed upływem terminu do odstąpienia od umowy, co skutkuje utratą prawa do odstąpienia od umowy i zwrotu pieniędzy.</li>
+                        <li>Zakupione przedmioty są przypisane do konkretnego konta (Nicku) i nie podlegają przeniesieniu na inne konto.</li>
+                        <li>Administrator nie ponosi odpowiedzialności za błędne wpisanie Nicku podczas dokonywania płatności.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">V. Odpowiedzialność i Bezpieczeństwo</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Użytkownik korzysta z Serwera na własną odpowiedzialność.</li>
+                        <li>Administrator nie odpowiada za szkody moralne lub materialne wynikłe z interakcji między graczami.</li>
+                        <li>Użytkownik jest zobowiązany do dbania o bezpieczeństwo swojego konta (silne hasło). Administrator nie przywraca przedmiotów utraconych w wyniku włamań na konto gracza.</li>
+                        <li>Wykorzystywanie błędów Serwera w celu uzyskania korzyści jest surowo zabronione i może skutkować trwałą blokadą konta (banem) bez zwrotu kosztów zakupionych usług.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">VI. Ochrona Danych Osobowych (RODO)</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Administratorem danych osobowych (np. adresów IP) jest właściciel Serwera SideMC.</li>
+                        <li>Dane są przetwarzane wyłącznie w celach technicznych, zapewnienia bezpieczeństwa oraz realizacji płatności.</li>
+                        <li>Szczegółowe zasady przetwarzania danych określa Polityka Prywatności dostępna poniżej.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">VII. Postanowienia Końcowe</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Administrator zastrzega sobie prawo do zmiany Regulaminu w dowolnym momencie. Zmiany wchodzą w życie z chwilą ich publikacji na stronie lub Discordzie Serwera.</li>
+                        <li>Nieznajomość regulaminu nie zwalnia z obowiązku jego przestrzegania.</li>
+                        <li>W sprawach nieuregulowanych niniejszym Regulaminem mają zastosowanie przepisy Kodeksu Cywilnego oraz inne właściwe przepisy prawa polskiego.</li>
+                    </ul>
+                </section>
+                <hr class="my-12 border-gray-200">
+                <div class="text-center max-w-3xl mx-auto mb-8 md:mb-10">
+                    <h3 class="font-heading font-black text-xl md:text-2xl text-brand-black uppercase tracking-widest mb-4">Polityka Prywatności Projektu SideMC</h3>
+                </div>
+
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">I. Informacje Ogólne</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Niniejsza Polityka Prywatności określa zasady przetwarzania i ochrony danych osobowych Użytkowników korzystających z serwera Minecraft SideMC, strony internetowej oraz sklepu internetowego (dalej jako „Serwis”).</li>
+                        <li>Administratorem danych osobowych jest X_FAZI , kontakt: ticket discord lub mail xfazi.pl@gmail.com .</li>
+                        <li>Administrator dba o bezpieczeństwo powierzonych danych, stosując odpowiednie środki techniczne i organizacyjne.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">II. Jakie dane zbieramy i w jakim celu?</h3>
+                    <p class="mt-2 text-justify leading-relaxed font-medium">Przetwarzamy dane wyłącznie w zakresie niezbędnym do prawidłowego funkcjonowania Serwera i realizacji usług:</p>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li><strong>Nick z gry (Minecraft):</strong> W celu identyfikacji gracza, zapisu postępów w grze oraz przypisania zakupionych usług.</li>
+                        <li><strong>Adres IP:</strong> W celach bezpieczeństwa (ochrona przed atakami DDoS, nakładanie blokad/banów na użytkowników łamiących regulamin) oraz statystycznych.</li>
+                        <li><strong>Adres e-mail:</strong> (Jeśli używasz go w sklepie/forum) W celu przesyłania potwierdzeń zakupu, odzyskiwania hasła lub kontaktu technicznego.</li>
+                        <li><strong>Dane o transakcjach:</strong> Informacje o zakupach w ItemShopie (data, kwota, przedmiot) niezbędne do realizacji zamówienia i celów księgowych.</li>
+                        <li><strong>Identyfikator Discord:</strong> (Jeśli posiadasz integrację) W celu synchronizacji rang i obsługi zgłoszeń (ticketów).</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">III. Podstawa Prawna Przetwarzania</h3>
+                    <p class="mt-2 text-justify leading-relaxed font-medium">Dane przetwarzane są na podstawie:</p>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li><strong>Art. 6 ust. 1 lit. b RODO</strong> – niezbędność do wykonania umowy (umożliwienie gry na serwerze i realizacji zakupów).</li>
+                        <li><strong>Art. 6 ust. 1 lit. f RODO</strong> – prawnie uzasadniony interes Administratora (zapewnienie bezpieczeństwa, walka z oszustami/cheaterami).</li>
+                        <li><strong>Art. 6 ust. 1 lit. c RODO</strong> – obowiązki prawne (np. wystawianie dokumentów księgowych).</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">IV. Odbiorcy Danych</h3>
+                    <p class="mt-2 text-justify leading-relaxed font-medium">Twoje dane mogą być przekazywane podmiotom trzecim tylko wtedy, gdy jest to niezbędne do działania serwisu:</p>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li><strong>Dostawca hostingu:</strong> Przechowywanie danych na serwerach.</li>
+                        <li><strong>Operatorzy płatności:</strong> W celu realizacji transakcji w ItemShopie.</li>
+                        <li><strong>Dostawcy narzędzi analitycznych:</strong> W celu ochrony przed atakami i analizy ruchu.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">V. Okres Przechowywania Danych</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Dane związane z kontem w grze przechowywane są przez okres aktywności Użytkownika na Serwerze lub do momentu zgłoszenia żądania ich usunięcia.</li>
+                        <li>Dane dotyczące płatności przechowywane są przez okres wymagany przepisami prawa podatkowego (zazwyczaj 5 lat).</li>
+                        <li>Logi serwerowe (adresy IP) są automatycznie nadpisywane lub usuwane po okresie [np. 30/90 dni].</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">VI. Prawa Użytkownika</h3>
+                    <p class="mt-2 text-justify leading-relaxed font-medium">Każdemu Użytkownikowi przysługuje prawo do:</p>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Dostępu do swoich danych oraz otrzymania ich kopii.</li>
+                        <li>Sprostowania (poprawiania) swoich danych.</li>
+                        <li>Usunięcia danych („prawo do bycia zapomnianym”) – o ile nie stoją za tym inne przepisy prawa.</li>
+                        <li>Ograniczenia przetwarzania danych.</li>
+                        <li>Wniesienia sprzeciwu wobec przetwarzania.</li>
+                        <li>Wniesienia skargi do organu nadzorczego (Prezesa Urzędu Ochrony Danych Osobowych).</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">VII. Pliki Cookies (Ciasteczka)</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Strona internetowa SideMC może wykorzystywać pliki cookies w celu zapewnienia poprawnego działania (np. logowanie do panelu gracza).</li>
+                        <li>Użytkownik może w każdej chwili zmienić ustawienia dotyczące cookies w swojej przeglądarce internetowej.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="text-base md:text-lg font-black text-brand-black mb-4 uppercase tracking-wider border-b-2 border-brand-black pb-2 inline-block">VIII. Zmiany w Polityce Prywatności</h3>
+                    <ul class="list-disc pl-5 space-y-3 mt-4 text-justify leading-relaxed">
+                        <li>Administrator zastrzega sobie prawo do wprowadzania zmian w niniejszym dokumencie. Nowa wersja polityki obowiązuje od momentu jej opublikowania na stronie Serwera lub kanale informacyjnym Discord.</li>
+                    </ul>
+                </section>
+
+            </div>
+        </div>
+    </div>
+    <div id="mode-modal" class="fixed inset-0 z-[110] hidden opacity-0 transition-opacity duration-300 p-4 sm:p-6 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeMode()"></div>
+        <div class="relative w-full max-w-5xl max-h-[90vh] bg-white rounded-2xl md:rounded-3xl flex flex-col overflow-hidden text-brand-black transition-transform duration-500 transform scale-95 shadow-2xl" id="glass-content">
+            <div class="overflow-y-auto custom-scrollbar flex-grow relative">  
+                <button onclick="closeMode()" class="absolute top-4 right-4 md:top-6 md:right-6 z-50 bg-white/80 backdrop-blur text-brand-black hover:bg-black hover:text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all shadow-lg border border-gray-200">
+                    <i class="fa-solid fa-xmark text-lg md:text-xl"></i>
+                </button>
+                <div class="w-full h-48 sm:h-64 md:h-96 relative bg-gray-100">
+                    <img id="modal-map-img" src="" alt="Mapa" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 md:bottom-12 md:left-12 pr-4">
+                        <span id="modal-mode-status" class="px-3 py-1 bg-black text-white text-[10px] md:text-xs font-bold rounded-full uppercase mb-2 md:mb-4 inline-block shadow-md">Włączony</span>
+                        <h2 id="modal-mode-title" class="font-heading font-black text-3xl md:text-4xl lg:text-6xl uppercase tracking-wider text-brand-black drop-shadow-md leading-none">NAZWA TRYBU</h2>
+                    </div>
+                </div>
+                <div class="p-6 md:p-8 lg:p-12 bg-white relative z-10 w-full">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10 w-full">
+                        <div id="modal-armors-section" class="hidden">
+                            <h3 class="font-black text-lg md:text-xl mb-6 md:mb-8 text-brand-black uppercase tracking-widest border-b-2 border-black pb-2 md:pb-3 inline-block">Customowe Zbroje</h3>
+                            <div id="modal-armors-list" class="grid grid-cols-1 gap-3 md:gap-4">
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-lg md:text-xl mb-6 md:mb-8 text-brand-black uppercase tracking-widest border-b-2 border-black pb-2 md:pb-3 inline-block">Nowości / Przecieki</h3>
+                            <ul id="modal-news-list" class="space-y-4 md:space-y-6 relative border-l-2 border-gray-100 ml-2 md:ml-3">
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-lg md:text-xl mb-6 md:mb-8 text-brand-black uppercase tracking-widest border-b-2 border-black pb-2 md:pb-3 inline-block">Customowe Itemy</h3>
+                            <div id="modal-items-list" class="grid grid-cols-1 gap-3 md:gap-4">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cookie-banner" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:w-[26rem] bg-white/85 backdrop-blur-xl border border-white/50 p-6 rounded-[1.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] z-[90] transform translate-y-[150%] opacity-0 transition-all duration-700 flex flex-col gap-5">
+        <div class="flex items-start gap-5">
+            <div class="bg-gradient-to-br from-gray-50 to-gray-200 p-4 rounded-2xl flex-shrink-0 shadow-inner border border-white">
+                <i class="fa-solid fa-cookie-bite text-2xl text-brand-black drop-shadow-sm"></i>
+            </div>
+            <div class="pt-1">
+                <h4 class="font-black text-brand-black uppercase tracking-widest text-xs md:text-sm mb-2">Pliki Cookies</h4>
+                <p class="text-[10px] md:text-[11px] text-gray-500 font-medium leading-relaxed">
+                    Korzystając ze strony, zgadzasz się na użycie ciasteczek oraz akceptujesz nasz 
+                    <button onclick="openRules()" class="text-brand-black font-bold hover:text-gray-400 transition-colors border-b-2 border-brand-black hover:border-gray-400 pb-0.5 mt-1">Regulamin i Politykę</button>.
+                </p>
+            </div>
+        </div>
+        <button onclick="acceptCookies()" class="w-full bg-brand-black text-white py-3.5 md:py-4 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_30px_rgba(0,0,0,0.2)] hover:-translate-y-1">
+            Akceptuję
+        </button>
+    </div>
+
+    <script>
+        const CONFIG = {
+            serverIP: "sidemc.pl",      
+            serverNamePart1: "SIDE",          
+            serverNamePart2: "PL",       
+            
+            discordLink: "https://discord.gg/SsrwnmTXMx",
+            shopLink: "https://vishop.pl/shop/26974/server/25632",
+            instagramLink: "wkrótce",
+            tiktokLink: "wkrótce",
+            youtubeLink: "https://www.youtube.com/@sidemc.m",
+            logoUrl: "https://i.imgur.com/dRDj3j3.png", 
+            heroImage: "https://i.imgur.com/iE2ZByt.png",
+            
+            discordMascotImage: "https://i.imgur.com/hGllrHJ.png", 
+
+            modes: [
+                 {
+                    id: "sidesmp",
+                    name: "SIDE SMP",
+                    comingSoon: false, 
+                    status: "Prace techniczne",
+                    statusColor: "bg-blue-600",
+                    bannerImage: "https://i.imgur.com/mOKccsJ.png", 
+                    mapImage: "https://i.imgur.com/fw1bL2F.png",
+                    news: [
+                        "20.02.2026 | Rozpoczęcie prac nad serwerem",
+                        "25.02.2026 | Rozpoczęcie prac nad castomowymi itemami oraz zbrojami",
+                    ],
+                    customItems: [
+                        { name: "Ostrze Feniksa", desc: "Co 30 sekund umożliwia wystrzelenie ognistego pocisku.", image: "https://i.imgur.com/rrPYfqM.png" },
+                        { name: "Kilof feniksa", desc: "Dodaję umiejętność kopania 3 bloków do pszodu i 1 blok w górę", image: "https://i.imgur.com/zPrNoe2.png" },
+                    ],
+                    customArmors: [
+                        { name: "Zbroja feniksa", desc: "Pełny set gwarantuje: podpalenie gracza który atakuję , regeneracja 1 , ognioodporność , szybkość 1 ,", image: "https://i.imgur.com/08yT7xN.png" },
+                    ]
+                },
+                {
+                    id: "soon1",
+                    name: "WKRÓTCE",
+                    comingSoon: true, 
+                    status: "Niedostępny",
+                    statusColor: "bg-gray-500",
+                    bannerImage: "https://i.imgur.com/mOKccsJ.png",
+                    mapImage: "",
+                    news: [],
+                    customItems: [],
+                    customArmors: []
+                },
+                {
+                    id: "soon2",
+                    name: "WKRÓTCE",
+                    comingSoon: true,
+                    status: "Niedostępny",
+                    statusColor: "bg-gray-500",
+                    bannerImage: "https://i.imgur.com/mOKccsJ.png",
+                    mapImage: "",
+                    news: [],
+                    customItems: [],
+                    customArmors: []
+                },
+                {
+                    id: "soon3",
+                    name: "WKRÓTCE",
+                    comingSoon: true,
+                    status: "Niedostępny",
+                    statusColor: "bg-gray-500",
+                    bannerImage: "https://i.imgur.com/mOKccsJ.png",
+                    mapImage: "",
+                    news: [],
+                    customItems: [],
+                    customArmors: []
+                }
+            ]
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.title = `${CONFIG.serverNamePart1}${CONFIG.serverNamePart2} - Serwer Minecraft`;
+            
+            const setText = (id, text) => { const el = document.getElementById(id); if(el) el.innerText = text; };
+            setText("bg-text", CONFIG.serverNamePart1);
+            setText("title-part1", CONFIG.serverNamePart1);
+            setText("title-part2", `.${CONFIG.serverNamePart2}`);
+            setText("ip-button-text", CONFIG.serverIP);
+            
+            const setSrc = (id, src) => { const el = document.getElementById(id); if(el && src) el.src = src; };
+            setSrc("hero-image", CONFIG.heroImage);
+            setSrc("discord-mascot", CONFIG.discordMascotImage);
+            
+            const setHref = (id, link) => { const el = document.getElementById(id); if(el && link) el.href = link; };
+            setHref("discord-btn", CONFIG.discordLink);
+            setHref("discord-btn-2", CONFIG.discordLink);
+            setHref("nav-discord", CONFIG.discordLink);
+            setHref("nav-dc-footer", CONFIG.discordLink);
+            setHref("nav-shop", CONFIG.shopLink);
+            setHref("nav-ig", CONFIG.instagramLink);
+            setHref("nav-tt", CONFIG.tiktokLink);
+            setHref("nav-yt", CONFIG.youtubeLink);
+
+            setHref("mobile-nav-discord", CONFIG.discordLink);
+            setHref("mobile-nav-shop", CONFIG.shopLink);
+            setHref("mobile-nav-ig", CONFIG.instagramLink);
+            setHref("mobile-nav-dc", CONFIG.discordLink);
+            setHref("mobile-nav-tt", CONFIG.tiktokLink);
+            setHref("mobile-nav-yt", CONFIG.youtubeLink);
+            
+            const logoContainers = [
+                document.getElementById("site-logo"),
+                document.getElementById("footer-logo"),
+                document.getElementById("footer-logo-small"),
+                document.getElementById("mobile-logo")
+            ];
+            
+            if(CONFIG.logoUrl !== "" && logoContainers[0]) {
+                logoContainers[0].innerHTML = `<img src="${CONFIG.logoUrl}" alt="Logo" class="h-10 md:h-12 lg:h-14 object-contain">`;
+                if(logoContainers[1]) logoContainers[1].innerHTML = `<img src="${CONFIG.logoUrl}" alt="Logo" class="h-12 md:h-16 object-contain mx-auto md:mx-0">`;
+                if(logoContainers[2]) logoContainers[2].innerHTML = `<img src="${CONFIG.logoUrl}" alt="Logo" class="h-5 md:h-6 object-contain opacity-80">`;
+                if(logoContainers[3]) logoContainers[3].innerHTML = `<img src="${CONFIG.logoUrl}" alt="Logo" class="h-8 object-contain">`;
+            } else if(logoContainers[0]) {
+                const defaultSvg = logoContainers[0].innerHTML;
+                if(logoContainers[1]) logoContainers[1].innerHTML = defaultSvg; 
+                if(logoContainers[2]) logoContainers[2].innerHTML = defaultSvg; 
+                if(logoContainers[3]) logoContainers[3].innerHTML = defaultSvg; 
+            }
+            
+            setText("footer-ip-btn-text", CONFIG.serverIP);
+            setText("footer-copyright", `Copyright ${new Date().getFullYear()} © ${CONFIG.serverIP} - Serwer Minecraft | WSZELKIE PRAWA ZASTRZEŻONE`);
+            setText("footer-disclaimer-pl", `Serwer ${CONFIG.serverIP} nie jest powiązany z firmą Mojang i Microsoft.`);
+            setText("footer-disclaimer-en", `${CONFIG.serverIP} server is not associated with Mojang or Microsoft.`);
+
+            const modesGrid = document.getElementById("modes-grid");
+            if (modesGrid) {
+                modesGrid.innerHTML = ""; 
+                CONFIG.modes.forEach(mode => {
+                    const card = document.createElement("div");
+                    
+                    if (mode.comingSoon) {
+                        card.className = "bg-white rounded-xl flex flex-col relative overflow-hidden border border-gray-100 opacity-60 shadow-sm";
+                        card.innerHTML = `
+                            <div class="w-full relative overflow-hidden bg-gray-100 border-b border-gray-100" style="aspect-ratio: 1512/2352;">
+                                <img src="${mode.bannerImage}" alt="Wkrótce" class="absolute inset-0 w-full h-full object-cover grayscale opacity-40">
+                            </div>
+                            <div class="p-4 md:p-5 flex flex-col items-center text-center">
+                                <h4 class="text-gray-400 font-black text-base md:text-lg mb-3 md:mb-4 tracking-widest uppercase">${mode.name}</h4>
+                                <button disabled class="bg-gray-100 text-gray-400 w-full py-2.5 md:py-3 text-[10px] font-bold uppercase tracking-widest rounded cursor-not-allowed">
+                                    NIEDOSTĘPNE
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        card.className = "bg-white rounded-xl flex flex-col relative overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] border border-gray-100 group";
+                        card.innerHTML = `
+                            <div class="w-full relative overflow-hidden bg-gray-100 border-b border-gray-100" style="aspect-ratio: 1512/2352;">
+                                <img src="${mode.bannerImage}" alt="${mode.name}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            </div>
+                            <div class="p-4 md:p-5 flex flex-col items-center text-center">
+                                <h4 class="text-brand-black font-black text-base md:text-lg mb-3 md:mb-4 tracking-widest uppercase">${mode.name}</h4>
+                                <button onclick="openMode('${mode.id}')" class="bg-brand-black text-white w-full py-2.5 md:py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors rounded shadow-md">
+                                    PRZEJDŹ
+                                </button>
+                            </div>
+                        `;
+                    }
+                    modesGrid.appendChild(card);
+                });
+            }
+
+            fetchPlayerCount();
+            setInterval(fetchPlayerCount, 60000); 
+            setTimeout(() => {
+                if (!localStorage.getItem('sidemc_cookie_consent')) {
+                    const banner = document.getElementById('cookie-banner');
+                    banner.classList.remove('translate-y-[150%]', 'opacity-0');
+                    banner.classList.add('translate-y-0', 'opacity-100');
+                }
+            }, 1000); 
+        });
+        function acceptCookies() {
+            localStorage.setItem('sidemc_cookie_consent', 'true');
+            const banner = document.getElementById('cookie-banner');
+            banner.classList.remove('translate-y-0', 'opacity-100');
+            banner.classList.add('translate-y-[150%]', 'opacity-0');
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, 700);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu.classList.contains('translate-x-full')) {
+                menu.classList.remove('translate-x-full');
+                document.body.style.overflow = 'hidden';
+            } else {
+                menu.classList.add('translate-x-full');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function openMode(modeId) {
+            const modeData = CONFIG.modes.find(m => m.id === modeId);
+            if(!modeData) return;
+
+            document.getElementById("modal-mode-title").innerText = modeData.name;
+            document.getElementById("modal-map-img").src = modeData.mapImage;
+            
+            const statusBadge = document.getElementById("modal-mode-status");
+            statusBadge.innerText = modeData.status || "WŁĄCZONY";
+            statusBadge.className = `px-3 py-1 text-white text-[10px] md:text-xs font-bold rounded-full uppercase mb-2 md:mb-4 inline-block shadow-md ${modeData.statusColor || 'bg-black'}`;
+            
+            const newsList = document.getElementById("modal-news-list");
+            newsList.innerHTML = "";
+            modeData.news.forEach(newsItem => {
+                newsList.innerHTML += `
+                    <li class="relative pl-5 md:pl-6">
+                        <div class="absolute left-[-4px] top-1.5 w-2 h-2 bg-black rounded-full"></div>
+                        <span class="text-gray-600 text-xs md:text-sm font-medium leading-relaxed">${newsItem}</span>
+                    </li>`;
+            });
+
+            const itemsList = document.getElementById("modal-items-list");
+            itemsList.innerHTML = "";
+            modeData.customItems.forEach(item => {
+                itemsList.innerHTML += `
+                    <div class="flex items-center p-3 md:p-4 bg-gray-50 border border-gray-100 rounded-xl hover:shadow-md transition-shadow">
+                        <img src="${item.image}" alt="${item.name}" class="w-10 h-10 md:w-12 md:h-12 object-contain mr-3 md:mr-4 mix-blend-multiply drop-shadow-sm">
+                        <div>
+                            <h4 class="font-bold text-brand-black text-xs md:text-sm uppercase">${item.name}</h4>
+                            <p class="text-[10px] md:text-xs text-gray-500 mt-1">${item.desc}</p>
+                        </div>
+                    </div>`;
+            });
+
+            const armorsSection = document.getElementById("modal-armors-section");
+            const armorsList = document.getElementById("modal-armors-list");
+            armorsList.innerHTML = "";
+            
+            if (modeData.customArmors && modeData.customArmors.length > 0) {
+                armorsSection.classList.remove("hidden");
+                modeData.customArmors.forEach(armor => {
+                    armorsList.innerHTML += `
+                        <div class="flex items-center p-3 md:p-4 bg-gray-50 border border-gray-100 rounded-xl hover:shadow-md transition-shadow">
+                            <img src="${armor.image}" alt="${armor.name}" class="w-10 h-10 md:w-12 md:h-12 object-contain mr-3 md:mr-4 mix-blend-multiply drop-shadow-sm">
+                            <div>
+                                <h4 class="font-bold text-brand-black text-xs md:text-sm uppercase">${armor.name}</h4>
+                                <p class="text-[10px] md:text-xs text-gray-500 mt-1 leading-relaxed">${armor.desc}</p>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                armorsSection.classList.add("hidden");
+            }
+
+            const modal = document.getElementById('mode-modal');
+            const content = document.getElementById('glass-content');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.classList.add('opacity-100');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMode() {
+            const modal = document.getElementById('mode-modal');
+            const content = document.getElementById('glass-content');
+            
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = '';
+        }
+
+        async function fetchPlayerCount() {
+            try {
+                const response = await fetch(`https://api.mcsrvstat.us/3/${CONFIG.serverIP}`);
+                const data = await response.json();
+                const countElement = document.getElementById("online-count");
+                const dotElement = document.getElementById("status-dot");
+                if (data.online) {
+                    countElement.innerText = data.players.online;
+                    dotElement.className = "w-2.5 h-2.5 bg-brand-black rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] animate-pulse transition-colors";
+                } else {
+                    countElement.innerText = "Offline";
+                    dotElement.className = "w-2.5 h-2.5 bg-gray-400 rounded-full transition-colors";
+                }
+            } catch (error) {
+                if (document.getElementById("online-count")) document.getElementById("online-count").innerText = "Błąd";
+            }
+        }
+
+        function copyIP() {
+            const ip = CONFIG.serverIP;
+            const copyTextElement = document.getElementById("copy-text");
+            const footerBtnText = document.getElementById("footer-ip-btn-text");
+            try {
+                const tempInput = document.createElement("input");
+                tempInput.style.position = "absolute";
+                tempInput.style.left = "-9999px"; 
+                tempInput.value = ip;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                tempInput.setSelectionRange(0, 99999); 
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+                
+                if(copyTextElement) {
+                    copyTextElement.innerText = "SKOPIOWANO!";
+                    copyTextElement.classList.add("text-brand-black");
+                    copyTextElement.classList.remove("text-gray-500");
+                }
+                if(footerBtnText) {
+                    footerBtnText.innerText = "SKOPIOWANO!";
+                    footerBtnText.classList.add("text-gray-400");
+                }
+                
+                setTimeout(() => {
+                    if(copyTextElement) {
+                        copyTextElement.innerText = "Skopiuj adres IP";
+                        copyTextElement.classList.remove("text-brand-black");
+                        copyTextElement.classList.add("text-gray-500");
+                    }
+                    if(footerBtnText) {
+                        footerBtnText.innerText = CONFIG.serverIP;
+                        footerBtnText.classList.remove("text-gray-400");
+                    }
+                }, 2000);
+            } catch(err) {}
+        }
+
+        function openRules() {
+            const modal = document.getElementById('rules-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.classList.add('opacity-100');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+        function closeRules() {
+            const modal = document.getElementById('rules-modal');
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+            document.body.style.overflow = '';
+        }
+    </script>
+</body>
+</html>
